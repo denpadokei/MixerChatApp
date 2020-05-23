@@ -5,18 +5,28 @@
              prism:ViewModelLocator.AutoWireViewModel="True">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
         </Grid.RowDefinitions>
-        <DataGrid Grid.Row="0" ItemsSource="{Binding Collection}" AutoGenerateColumns="False" IsReadOnly="True">
+        <ToolBarPanel Grid.Row="0">
+            <ToolBar Name="設定" Visibility="Visible" >
+                <Button Content="設定" Command="{Binding ?}" />
+            </ToolBar>
+        </ToolBarPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding ChannelName}" />
+            <Button Grid.Column="1" Width="45" Content="接続" Command="{Binding StartCommand}" />
+        </Grid>
+        <DataGrid Grid.Row="2" ItemsSource="{Binding Collection}" AutoGenerateColumns="False" IsReadOnly="True">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="名前" Binding="{Binding UserName}" />
-                <DataGridTextColumn Header="コメント" Binding="{Binding Message}" />
+                <DataGridTextColumn Width="*" Header="コメント" Binding="{Binding Message}" />
             </DataGrid.Columns>
         </DataGrid>
-        <StackPanel Grid.Row="1">
-            <TextBox Text="{Binding ChannelName}" />
-            <Button Content="接続" Command="{Binding StartCommand}" />
-        </StackPanel>
     </Grid>
 </UserControl>

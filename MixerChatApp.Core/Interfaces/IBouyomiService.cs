@@ -10,6 +10,6 @@ namespace MixerChatApp.Core.Interfaces
     {
         public int Port { get; set; }
         public string Host { get; set; }
-        Task SendMessage();
+        Task SendMessage(string message);
     }
 }
