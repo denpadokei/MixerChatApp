@@ -17,6 +17,7 @@ namespace MixerChatApp.Core
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IChatService, ChatService>();
+            containerRegistry.RegisterSingleton<IBouyomiService, BouyomiService>();
         }
     }
 }
