@@ -11,7 +11,7 @@
         </Grid.RowDefinitions>
         <ToolBarPanel Grid.Row="0">
             <ToolBar Name="設定" Visibility="Visible" >
-                <Button Content="設定" Command="{Binding ?}" />
+                <Button Content="設定" Command="{Binding ShowSettingCommand}" />
             </ToolBar>
         </ToolBarPanel>
         <Grid Grid.Row="1">

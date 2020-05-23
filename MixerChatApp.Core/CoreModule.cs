@@ -11,14 +11,14 @@ namespace MixerChatApp.Core
     {
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            var rm = containerProvider.Resolve<IRegionManager>();
-            rm.RegisterViewWithRegion(RegionName.SettingRegionName, typeof(Setting));
+            
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
             containerRegistry.RegisterSingleton<IChatService, ChatService>();
             containerRegistry.RegisterSingleton<IBouyomiService, BouyomiService>();
+            containerRegistry.RegisterDialog<Setting>(RegionName.SettingRegionName);
         }
     }
 }
