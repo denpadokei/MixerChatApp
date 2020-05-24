@@ -1,4 +1,5 @@
 ﻿using MixerChatApp.Core;
+using MixerChatApp.Home.Models;
 using MixerChatApp.Home.Views;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -16,7 +17,7 @@ namespace MixerChatApp.Home
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-
+            containerRegistry.Register<MainContentDomain>();
         }
     }
 }

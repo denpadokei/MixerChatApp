@@ -98,8 +98,6 @@ namespace MixerChatApp.Core.Services
                 }
                 Debug.WriteLine($"{this.Auth.AuthMethod}");
                 this.Client = await MixerClient.StartAsync(this.ChannelName, this.Auth);
-                (var title, _) = await this.Client.RestClient.GetChannelInfoAsync();
-                Application.Current.MainWindow.Title = title;
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");

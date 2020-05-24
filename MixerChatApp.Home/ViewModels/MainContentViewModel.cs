@@ -23,26 +23,7 @@ namespace MixerChatApp.Home.ViewModels
     {
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プロパティ
-        /// <summary>説明 を取得、設定</summary>
-        private ObservableSynchronizedCollection<CommentEntity> queue_;
-        /// <summary>説明 を取得、設定</summary>
-        public ObservableSynchronizedCollection<CommentEntity> Queue
-        {
-            get => this.queue_;
-
-            set => this.SetProperty(ref this.queue_, value);
-        }
-
-        /// <summary>説明 を取得、設定</summary>
-        private SortedObservableCollection<CommentEntity, DateTime> sortedQueue_;
-        /// <summary>説明 を取得、設定</summary>
-        public SortedObservableCollection<CommentEntity, DateTime> SortedQueue
-        {
-            get => this.sortedQueue_;
-
-            set => this.SetProperty(ref this.sortedQueue_, value);
-        }
-
+        
         /// <summary>説明 を取得、設定</summary>
         private SynchronizationContextCollection<CommentEntity> collection_;
         /// <summary>説明 を取得、設定</summary>
@@ -89,17 +70,7 @@ namespace MixerChatApp.Home.ViewModels
         public DelegateCommand StartCommand =>
             startCommand_ ?? (startCommand_ = new DelegateCommand(ExecuteStartCommand));
 
-        async void ExecuteStartCommand()
-        {
-            try {
-                await this._chatService.StartClient();
-                this._chatService.Client.ChatMessage -= this.MixerChat;
-                this._chatService.Client.ChatMessage += this.MixerChat;
-            }
-            catch (Exception e) {
-                Debug.WriteLine($"{e.Message}");
-            }
-        }
+        async void ExecuteStartCommand() => await this._domain.Connect();
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド用メソッド
@@ -126,7 +97,10 @@ namespace MixerChatApp.Home.ViewModels
         {
             var result = await this._chatService?.SendMessage(this.Message);
             if (result) {
-                this.Queue.Add(new CommentEntity(this._chatService.Client.UserName, this.Message));
+                this._domain.Queue.Add(new CommentEntity(this._chatService.Client.UserName, this.Message));
+                if (this.IsSending) {
+                    this._bouyomiService.SendMessage(this.Message);
+                }
                 this.Message = "";
             }
         }
@@ -139,6 +113,9 @@ namespace MixerChatApp.Home.ViewModels
             if (args.PropertyName == nameof(this.ChannelName)) {
                 this._chatService.ChannelName = this.ChannelName;
             }
+            else if (args.PropertyName == nameof(this.IsSending)) {
+                this._domain.IsSending = this.IsSending;
+            }
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -148,18 +125,12 @@ namespace MixerChatApp.Home.ViewModels
         {
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
                 this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnOauthPropertyChanged);
+            this.Collection = this._domain.SortedQueue.ToSyncedSynchronizationContextCollection(SynchronizationContext.Current);
+            this.IsSending = true;
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
-        private async void MixerChat(object sender, ChatMessageEventArgs e)
-        {
-            this.Queue.Add(new CommentEntity(e.UserName, e.Message));
-            if (this.IsSending) {
-                await this._bouyomiService.SendMessage(e.Message);
-            }
-        }
-
         private void OnOauthPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (sender is IOAuthManagerable manager && e.PropertyName == nameof(manager.Tokens)) {
@@ -178,15 +149,14 @@ namespace MixerChatApp.Home.ViewModels
         public IDialogService _dialogService;
         [Dependency]
         public IOAuthManagerable _oAuthManager;
+        [Dependency]
+        public MainContentDomain _domain;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         public MainContentViewModel()
         {
-            this.Queue = new ObservableSynchronizedCollection<CommentEntity>();
-            this.SortedQueue = this.Queue.ToSyncedSortedObservableCollection(key => key.CommentDate, null, true);
-            this.Collection = this.SortedQueue.ToSyncedSynchronizationContextCollection(SynchronizationContext.Current);
-            this.IsSending = true;
+            
         }
         #endregion
     }

@@ -26,7 +26,7 @@
         </Grid>
         <DataGrid Grid.Row="2" ItemsSource="{Binding Collection}" AutoGenerateColumns="False" IsReadOnly="True">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="日時" Binding="{Binding CommentDate}" />
+                <DataGridTextColumn Header="日時" Binding="{Binding CommentDate,StringFormat={}{0:yyyy/MM/dd hh:mm:ss}}" />
                 <DataGridTextColumn Header="名前" Binding="{Binding UserName}" />
                 <DataGridTextColumn Width="*" Header="コメント" Binding="{Binding Message}" />
             </DataGrid.Columns>
