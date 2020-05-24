@@ -13,4 +13,9 @@
   <ItemGroup>
     <ProjectReference Include="..\MixerChatApp.Core\MixerChatApp.Core.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Mixer.ShortcodeOAuth">
+      <HintPath>..\..\shortcode-oauth\csharp\ShortcodeOAuth\bin\Release\netstandard2.0\Microsoft.Mixer.ShortcodeOAuth.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 </Project>

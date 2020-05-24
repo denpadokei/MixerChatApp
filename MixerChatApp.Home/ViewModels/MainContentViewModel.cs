@@ -60,6 +60,16 @@ namespace MixerChatApp.Home.ViewModels
 
             set => this.SetProperty(ref this.isSending_, value);
         }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string message_;
+        /// <summary>説明 を取得、設定</summary>
+        public string Message
+        {
+            get => this.message_;
+
+            set => this.SetProperty(ref this.message_, value);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -93,7 +103,20 @@ namespace MixerChatApp.Home.ViewModels
                 if (result.Result == ButtonResult.OK) {
                     this.IsSending = result.Parameters.GetValue<bool>("IsSending");
                 }
+
+                if (this._oAuthManager.Tokens != null) {
+                    this._chatService.Token = this._oAuthManager.Tokens.AccessToken;
+                }
             });
+        }
+
+        private DelegateCommand sendCommand_;
+        public DelegateCommand SendCommand =>
+            sendCommand_ ?? (sendCommand_ = new DelegateCommand(ExecuteSendCommand));
+
+        async void ExecuteSendCommand()
+        {
+            await this._chatService?.SendMessage(this.Message);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -127,6 +150,8 @@ namespace MixerChatApp.Home.ViewModels
         public IBouyomiService _bouyomiService;
         [Dependency]
         public IDialogService _dialogService;
+        [Dependency]
+        public IOAuthManagerable _oAuthManager;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

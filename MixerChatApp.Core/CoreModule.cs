@@ -18,6 +18,7 @@ namespace MixerChatApp.Core
         {
             containerRegistry.RegisterSingleton<IChatService, ChatService>();
             containerRegistry.RegisterSingleton<IBouyomiService, BouyomiService>();
+            containerRegistry.RegisterSingleton<IOAuthManagerable, OAuthManager>();
             containerRegistry.RegisterDialog<Setting>(RegionName.SettingRegionName);
         }
     }

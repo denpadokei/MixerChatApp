@@ -44,6 +44,16 @@ namespace MixerChatApp.Core.Services
 
             set => this.SetProperty(ref this.channelName_, value);
         }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string token_;
+        /// <summary>説明 を取得、設定</summary>
+        public string Token
+        {
+            get => this.token_;
+
+            set => this.SetProperty(ref this.token_, value);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -59,12 +69,23 @@ namespace MixerChatApp.Core.Services
         public async Task StartClient()
         {
             try {
-                this.Auth = TOKEN != null ? new Auth.ImplicitGrant(TOKEN) : null;
+                this.Auth = !string.IsNullOrEmpty(this.Token) ? new Auth.ImplicitGrant(this.Token) : null;
+                if (this.Client != null) {
+                    this.Client.Dispose();
+                    this.Client = null;
+                }
+                Debug.WriteLine($"{this.Auth.AuthMethod}");
                 this.Client = await MixerClient.StartAsync(this.ChannelName, this.Auth);
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");
             }
+        }
+
+        public async Task SendMessage(string message)
+        {
+            var result = await this.Client.SendMessageAsync(message);
+            Debug.WriteLine($"{result}");
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -72,7 +93,7 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        private const string TOKEN = null;
+
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

@@ -13,6 +13,8 @@ namespace MixerChatApp.Core.Interfaces
         IAuthorization Auth { get; set; }
         IMixerClient Client { get; set; }
         public string ChannelName { get; set; }
+        public string Token { get; set; }
         Task StartClient();
+        Task SendMessage(string message);
     }
 }

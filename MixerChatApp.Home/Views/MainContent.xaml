@@ -8,6 +8,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <ToolBarPanel Grid.Row="0">
             <ToolBar Name="設定" Visibility="Visible" >
@@ -28,5 +29,13 @@
                 <DataGridTextColumn Width="*" Header="コメント" Binding="{Binding Message}" />
             </DataGrid.Columns>
         </DataGrid>
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBox Grid.Column="0" Text="{Binding Message}" />
+            <Button Grid.Column="1" Width="45" Content="送信" Command="{Binding SendCommand}" />
+        </Grid>
     </Grid>
 </UserControl>
