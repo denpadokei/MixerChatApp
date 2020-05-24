@@ -12,9 +12,10 @@ namespace MixerChatApp.Core.Interfaces
     {
         IAuthorization Auth { get; set; }
         IMixerClient Client { get; set; }
-        public string ChannelName { get; set; }
-        public string Token { get; set; }
+        string ChannelName { get; set; }
+        string Token { get; set; }
+        DateTimeOffset ExpiresAt { get; set; }
         Task StartClient();
-        Task SendMessage(string message);
+        Task<bool> SendMessage(string message);
     }
 }

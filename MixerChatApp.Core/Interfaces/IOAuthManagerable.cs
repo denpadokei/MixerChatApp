@@ -10,7 +10,6 @@ namespace MixerChatApp.Core.Interfaces
     public interface IOAuthManagerable : INotifyPropertyChanged
     {
         string Code { get; set; }
-        string ClientId { get; }
         List<string> Scorp { get; set; }
         public OAuthTokens Tokens { get; set; }
         Task RunAsync();

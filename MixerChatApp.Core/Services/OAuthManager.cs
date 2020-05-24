@@ -1,10 +1,12 @@
 ﻿using Microsoft.Mixer.ShortcodeOAuth;
 using MixerChatApp.Core.Interfaces;
+using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Threading;
@@ -26,15 +28,6 @@ namespace MixerChatApp.Core.Services
             set => this.SetProperty(ref this.cord_, value);
         }
 
-        /// <summary>説明 を取得、設定</summary>
-        private string clientId_;
-        /// <summary>説明 を取得、設定</summary>
-        public string ClientId
-        {
-            get => this.clientId_;
-
-            private set => this.SetProperty(ref this.clientId_, value);
-        }
         /// <summary>説明 を取得、設定</summary>
         private List<string> scorp_;
         /// <summary>説明 を取得、設定</summary>
@@ -69,13 +62,11 @@ namespace MixerChatApp.Core.Services
         public async Task RunAsync()
         {
             try {
-
-
                 // Create your OAuth client. Specify your client ID, and which permissions you want.
                 var client = new OAuthClient(
                     new OAuthOptions
                     {
-                        ClientId = this.ClientId,
+                        ClientId = CLIENT_ID,
                         Scopes = this.Scorp.ToArray(),
                     });
 
@@ -92,6 +83,12 @@ namespace MixerChatApp.Core.Services
                 Debug.WriteLine($"Access token: {this.Tokens.AccessToken}");
                 Debug.WriteLine($"Refresh token: {this.Tokens.RefreshToken}");
                 Debug.WriteLine($"Expires At: {this.Tokens.ExpiresAt}");
+                var entity = new SettingEntity() { AcsessToken = this.Tokens.AccessToken, ExporesAt = $"{this.Tokens.ExpiresAt}" };
+                var text = JsonConvert.SerializeObject(entity, Formatting.Indented);
+                using (var sw = new StreamWriter(@".\appsettings.json")) {
+                    sw.Write(text);
+                    sw.Close();
+                }
             }
             catch (OAuthException oe) {
                 Debug.WriteLine($"{oe.Message}");
@@ -106,13 +103,30 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
+        private const string CLIENT_ID = "3b85e7f860817b1ff0263309e7ad49ecfca2b90be648a8c5";
+        private class SettingEntity
+        {
+            [JsonProperty("AcsessToken")]
+            public string AcsessToken { get; set; }
+            [JsonProperty("ExporesAt")]
+            public string ExporesAt { get; set; }
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         public OAuthManager()
         {
-            this.ClientId = "3b85e7f860817b1ff0263309e7ad49ecfca2b90be648a8c5";
-            this.Scorp = new List<string>() { "chat:chat", "chat:connect" };
+            this.Scorp = new List<string>()
+            {
+                "channel:update:self",
+                "chat:bypass_links",
+                "chat:bypass_slowchat",
+                "chat:change_ban",
+                "chat:chat",
+                "chat:connect",
+                "chat:timeout",
+                "chat:whisper",
+            };
         }
         #endregion
 

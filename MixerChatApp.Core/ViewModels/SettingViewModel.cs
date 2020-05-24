@@ -36,6 +36,16 @@ namespace MixerChatApp.Core.ViewModels
 
             set => this.SetProperty(ref this.code_, value);
         }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string token_;
+        /// <summary>説明 を取得、設定</summary>
+        public string Token
+        {
+            get => this.token_;
+
+            set => this.SetProperty(ref this.token_, value);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -51,11 +61,11 @@ namespace MixerChatApp.Core.ViewModels
 
         private DelegateCommand createTokensCommand_;
         public DelegateCommand CreateTokensCommand =>
-            createTokensCommand_ ?? (createTokensCommand_ = new DelegateCommand(ExecuteCreateTokensCommand));
+            createTokensCommand_ ?? (createTokensCommand_ = new DelegateCommand(ExecuteCreateTokensCommand, IsDisConnected).ObservesProperty(() => this.Token));
 
         async void ExecuteCreateTokensCommand()
         {
-            await this._oAuthManager_.RunAsync();
+            await this._oAuthManager.RunAsync();
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -87,7 +97,9 @@ namespace MixerChatApp.Core.ViewModels
         public void Init()
         {
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
-                this._oAuthManager_, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
+                this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
+            WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
+                this._chatService, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -98,11 +110,26 @@ namespace MixerChatApp.Core.ViewModels
                 this.Code = manager.Code;
             }
         }
+
+        private void OnChatServicePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is IChatService service && e.PropertyName == nameof(service.Token)) {
+                this.Token = service.Token;
+            }
+        }
+
+        private bool IsDisConnected()
+        {
+            return !((DateTimeOffset.UtcNow - this._chatService.ExpiresAt) < new TimeSpan(6, 0, 0)
+                && !string.IsNullOrEmpty(this._chatService.Token));
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
         [Dependency]
-        public IOAuthManagerable _oAuthManager_;
+        public IOAuthManagerable _oAuthManager;
+        [Dependency]
+        public IChatService _chatService;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

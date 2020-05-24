@@ -1,13 +1,18 @@
-﻿using MixerChatApp.Core.Interfaces;
+﻿using Microsoft.Extensions.Configuration;
+using MixerChatApp.Core.Interfaces;
 using MixerLib;
 using MixerLib.Events;
+using Newtonsoft.Json;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 
 namespace MixerChatApp.Core.Services
 {
@@ -54,6 +59,16 @@ namespace MixerChatApp.Core.Services
 
             set => this.SetProperty(ref this.token_, value);
         }
+
+        /// <summary>説明 を取得、設定</summary>
+        private DateTimeOffset expiresAt_;
+        /// <summary>説明 を取得、設定</summary>
+        public DateTimeOffset ExpiresAt
+        {
+            get => this.expiresAt_;
+
+            set => this.SetProperty(ref this.expiresAt_, value);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -69,37 +84,75 @@ namespace MixerChatApp.Core.Services
         public async Task StartClient()
         {
             try {
-                this.Auth = !string.IsNullOrEmpty(this.Token) ? new Auth.ImplicitGrant(this.Token) : null;
+                if (!string.IsNullOrEmpty(this.Token)) {
+                    
+                    this.Auth = new Auth.ImplicitGrant(this.Token);
+                }
+                else {
+                    this.Auth = null;
+                }
+                 
                 if (this.Client != null) {
                     this.Client.Dispose();
                     this.Client = null;
                 }
                 Debug.WriteLine($"{this.Auth.AuthMethod}");
                 this.Client = await MixerClient.StartAsync(this.ChannelName, this.Auth);
+                (var title, _) = await this.Client.RestClient.GetChannelInfoAsync();
+                Application.Current.MainWindow.Title = title;
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");
             }
         }
 
-        public async Task SendMessage(string message)
+        public async Task<bool> SendMessage(string message)
         {
             var result = await this.Client.SendMessageAsync(message);
             Debug.WriteLine($"{result}");
+            return result;
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
+        #region // JSON
+        private class SettingEntity
+        {
+            [JsonProperty("AcsessToken")]
+            public string AcsessToken { get; set; }
+            [JsonProperty("ExporesAt")]
+            public string ExporesAt { get; set; }
+        }
+        #endregion
+        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-
+        //private readonly string SETTING_NAME = "MIXER_CHAT_APP_";
+        private readonly string ACSESS_TOKEN_NAME = "AcsessToken";
+        private readonly string EXPIRES_AT_NAME = "ExporesAt";
+        private IConfigurationRoot _configurationRoot;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         public ChatService()
         {
-
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
+            if (!File.Exists(path)) {
+                using (var fs = File.CreateText(path)) {
+                    var text = JsonConvert.SerializeObject(new SettingEntity(), Formatting.Indented);
+                    fs.Write(text);
+                    fs.Close();
+                } 
+            }
+            var bulder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+            this._configurationRoot = bulder.Build();
+            if (DateTimeOffset.TryParse(this._configurationRoot[this.EXPIRES_AT_NAME], out var datetime) && (DateTimeOffset.UtcNow - datetime) < new TimeSpan(6, 0, 0)) {
+                this.Token = this._configurationRoot[this.ACSESS_TOKEN_NAME];
+                this.ExpiresAt = datetime;
+            }
         }
         #region IDisposable Support
         private bool disposedValue = false; // 重複する呼び出しを検出するには

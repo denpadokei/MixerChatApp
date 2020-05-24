@@ -9,6 +9,16 @@ namespace MixerChatApp.Home.Models
     public class CommentEntity : BindableBase
     {
         /// <summary>説明 を取得、設定</summary>
+        private DateTime commentDate_;
+        /// <summary>説明 を取得、設定</summary>
+        public DateTime CommentDate
+        {
+            get => this.commentDate_;
+
+            set => this.SetProperty(ref this.commentDate_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
         private string userName_;
         /// <summary>説明 を取得、設定</summary>
         public string UserName
@@ -32,6 +42,7 @@ namespace MixerChatApp.Home.Models
         {
             this.UserName = username;
             this.Message = message;
+            this.CommentDate = DateTime.Now;
         }
     }
 }

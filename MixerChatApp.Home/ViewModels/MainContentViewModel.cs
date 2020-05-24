@@ -12,7 +12,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading;
+using System.Windows;
 using Unity;
 
 namespace MixerChatApp.Home.ViewModels
@@ -29,6 +31,16 @@ namespace MixerChatApp.Home.ViewModels
             get => this.queue_;
 
             set => this.SetProperty(ref this.queue_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private SortedObservableCollection<CommentEntity, DateTime> sortedQueue_;
+        /// <summary>説明 を取得、設定</summary>
+        public SortedObservableCollection<CommentEntity, DateTime> SortedQueue
+        {
+            get => this.sortedQueue_;
+
+            set => this.SetProperty(ref this.sortedQueue_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -103,10 +115,6 @@ namespace MixerChatApp.Home.ViewModels
                 if (result.Result == ButtonResult.OK) {
                     this.IsSending = result.Parameters.GetValue<bool>("IsSending");
                 }
-
-                if (this._oAuthManager.Tokens != null) {
-                    this._chatService.Token = this._oAuthManager.Tokens.AccessToken;
-                }
             });
         }
 
@@ -116,7 +124,11 @@ namespace MixerChatApp.Home.ViewModels
 
         async void ExecuteSendCommand()
         {
-            await this._chatService?.SendMessage(this.Message);
+            var result = await this._chatService?.SendMessage(this.Message);
+            if (result) {
+                this.Queue.Add(new CommentEntity(this._chatService.Client.UserName, this.Message));
+                this.Message = "";
+            }
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -131,6 +143,12 @@ namespace MixerChatApp.Home.ViewModels
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
+        [InjectionMethod]
+        public void Init()
+        {
+            WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
+                this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnOauthPropertyChanged);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
@@ -139,6 +157,14 @@ namespace MixerChatApp.Home.ViewModels
             this.Queue.Add(new CommentEntity(e.UserName, e.Message));
             if (this.IsSending) {
                 await this._bouyomiService.SendMessage(e.Message);
+            }
+        }
+
+        private void OnOauthPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is IOAuthManagerable manager && e.PropertyName == nameof(manager.Tokens)) {
+                this._chatService.Token = manager.Tokens.AccessToken;
+                this._chatService.ExpiresAt = manager.Tokens.ExpiresAt;
             }
         }
         #endregion
@@ -158,7 +184,8 @@ namespace MixerChatApp.Home.ViewModels
         public MainContentViewModel()
         {
             this.Queue = new ObservableSynchronizedCollection<CommentEntity>();
-            this.Collection = this.Queue.ToSyncedSynchronizationContextCollection(SynchronizationContext.Current);
+            this.SortedQueue = this.Queue.ToSyncedSortedObservableCollection(key => key.CommentDate, null, true);
+            this.Collection = this.SortedQueue.ToSyncedSynchronizationContextCollection(SynchronizationContext.Current);
             this.IsSending = true;
         }
         #endregion
