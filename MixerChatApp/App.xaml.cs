@@ -22,9 +22,9 @@ namespace MixerChatApp
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            base.ConfigureModuleCatalog(moduleCatalog);
             moduleCatalog.AddModule<CoreModule>();
             moduleCatalog.AddModule<HomeModule>();
+            base.ConfigureModuleCatalog(moduleCatalog);
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)

@@ -45,16 +45,6 @@ namespace MixerChatApp.Home.ViewModels
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private bool isSending_;
-        /// <summary>説明 を取得、設定</summary>
-        public bool IsSending
-        {
-            get => this.isSending_;
-
-            set => this.SetProperty(ref this.isSending_, value);
-        }
-
-        /// <summary>説明 を取得、設定</summary>
         private string message_;
         /// <summary>説明 を取得、設定</summary>
         public string Message
@@ -80,13 +70,8 @@ namespace MixerChatApp.Home.ViewModels
 
         void ExecuteShowSettingCommand()
         {
-            var param = new DialogParameters() { { "IsSending", this.IsSending } };
-            this._dialogService?.Show(RegionName.SettingRegionName, param, result =>
-            {
-                if (result.Result == ButtonResult.OK) {
-                    this.IsSending = result.Parameters.GetValue<bool>("IsSending");
-                }
-            });
+
+            this._dialogService?.Show(RegionName.SettingRegionName, new DialogParameters(), _ => { });
         }
 
         private DelegateCommand sendCommand_;
@@ -98,7 +83,7 @@ namespace MixerChatApp.Home.ViewModels
             var result = await this._chatService?.SendMessage(this.Message);
             if (result) {
                 this._domain.Queue.Add(new CommentEntity(this._chatService.Client.UserName, this.Message));
-                if (this.IsSending) {
+                if (this._settingDomain.IsSending) {
                     await this._bouyomiService.SendMessage(this.Message);
                 }
                 this.Message = "";
@@ -113,9 +98,6 @@ namespace MixerChatApp.Home.ViewModels
             if (args.PropertyName == nameof(this.ChannelName)) {
                 this._chatService.ChannelName = this.ChannelName;
             }
-            else if (args.PropertyName == nameof(this.IsSending)) {
-                this._domain.IsSending = this.IsSending;
-            }
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -126,7 +108,6 @@ namespace MixerChatApp.Home.ViewModels
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
                 this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnOauthPropertyChanged);
             this.Collection = this._domain.SortedQueue.ToSyncedSynchronizationContextCollection(SynchronizationContext.Current);
-            this.IsSending = true;
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -149,6 +130,8 @@ namespace MixerChatApp.Home.ViewModels
         public IDialogService _dialogService;
         [Dependency]
         public IOAuthManagerable _oAuthManager;
+        [Dependency]
+        public ISettingDomain _settingDomain;
         [Dependency]
         public MainContentDomain _domain;
         #endregion

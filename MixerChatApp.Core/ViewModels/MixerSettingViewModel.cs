@@ -1,43 +1,50 @@
 ﻿using MixerChatApp.Core.Interfaces;
-using MixerLib.Events;
 using Prism.Commands;
 using Prism.Mvvm;
-using StatefulModel;
+using Prism.Regions;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Windows;
 using Unity;
 
-namespace MixerChatApp.Home.Models
+namespace MixerChatApp.Core.ViewModels
 {
-    public class MainContentDomain : BindableBase
+    public class MixerSettingViewModel : BindableBase
     {
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プロパティ
         /// <summary>説明 を取得、設定</summary>
-        private ObservableSynchronizedCollection<CommentEntity> queue_;
+        private string code_;
         /// <summary>説明 を取得、設定</summary>
-        public ObservableSynchronizedCollection<CommentEntity> Queue
+        public string Code
         {
-            get => this.queue_;
+            get => this.code_;
 
-            set => this.SetProperty(ref this.queue_, value);
+            set => this.SetProperty(ref this.code_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
-        private SortedObservableCollection<CommentEntity, DateTime> sortedQueue_;
+        private string token_;
         /// <summary>説明 を取得、設定</summary>
-        public SortedObservableCollection<CommentEntity, DateTime> SortedQueue
+        public string Token
         {
-            get => this.sortedQueue_;
+            get => this.token_;
 
-            set => this.SetProperty(ref this.sortedQueue_, value);
+            set => this.SetProperty(ref this.token_, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
+        private DelegateCommand createTokensCommand_;
+        public DelegateCommand CreateTokensCommand =>
+            createTokensCommand_ ?? (createTokensCommand_ = new DelegateCommand(ExecuteCreateTokensCommand, IsDisConnected).ObservesProperty(() => this.Token));
+
+        async void ExecuteCreateTokensCommand()
+        {
+            await this._oAuthManager.RunAsync();
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド用メソッド
@@ -50,47 +57,46 @@ namespace MixerChatApp.Home.Models
         [InjectionMethod]
         public void Init()
         {
-
-        }
-
-        public async Task Connect()
-        {
-            try {
-                await this._chatService.StartClient();
-                this._chatService.Client.ChatMessage -= this.MixerChatReceived;
-                this._chatService.Client.ChatMessage += this.MixerChatReceived;
-                (System.Windows.Application.Current.MainWindow.Title, _) = await this._chatService.Client.RestClient.GetChannelInfoAsync();
-            }
-            catch (Exception e) {
-                Debug.WriteLine($"{e.Message}");
-            }
+            WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
+                this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
+            WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
+                this._chatService, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
-        private async void MixerChatReceived(object sender, ChatMessageEventArgs e)
+        private void OnManagerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            this.Queue.Add(new CommentEntity(e.UserName, e.Message));
-            if (this._settingDomain.IsSending) {
-                await this._bouyomiService.SendMessage(e.Message);
+            if (sender is IOAuthManagerable manager && e.PropertyName == nameof(manager.Code)) {
+                this.Code = manager.Code;
             }
+        }
+
+        private void OnChatServicePropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (sender is IChatService service && e.PropertyName == nameof(service.Token)) {
+                this.Token = service.Token;
+            }
+        }
+
+        private bool IsDisConnected()
+        {
+            return !((DateTimeOffset.UtcNow - this._chatService.ExpiresAt) < new TimeSpan(6, 0, 0)
+                && !string.IsNullOrEmpty(this._chatService.Token));
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
         [Dependency]
+        public IOAuthManagerable _oAuthManager;
+        [Dependency]
         public IChatService _chatService;
-        [Dependency]
-        public IBouyomiService _bouyomiService;
-        [Dependency]
-        public ISettingDomain _settingDomain;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
-        public MainContentDomain()
+        public MixerSettingViewModel()
         {
-            this.Queue = new ObservableSynchronizedCollection<CommentEntity>();
-            this.SortedQueue = this.Queue.ToSyncedSortedObservableCollection(key => key.CommentDate, null, true);
+
         }
         #endregion
     }

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWPF>true</UseWPF>
     <AssemblyName>MixerChatApp.Core</AssemblyName>
   </PropertyGroup>
@@ -10,14 +10,15 @@
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="Prism.Unity" Version="7.2.0.1422" />
     <PackageReference Include="Prism.Wpf" Version="7.2.0.1422" />
+    <PackageReference Include="StatefulModel" Version="0.6.0" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="DenpadokeiFramework">
+      <HintPath>..\pakages\DenpadokeiFramework.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Mixer.ShortcodeOAuth">
       <HintPath>..\..\shortcode-oauth\csharp\ShortcodeOAuth\bin\Release\netstandard2.0\Microsoft.Mixer.ShortcodeOAuth.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="appsettings.Develop.json">

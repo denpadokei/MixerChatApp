@@ -69,7 +69,7 @@ namespace MixerChatApp.Core.Services
 #if DEBUG
                 var bulder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile(@".\appsettings.Develop.json");
+                    .AddJsonFile("appsettings.Develop.json");
                 var configuration = bulder.Build();
 
                 var clientid = configuration["ClientId"];
