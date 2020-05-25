@@ -99,7 +99,7 @@ namespace MixerChatApp.Home.ViewModels
             if (result) {
                 this._domain.Queue.Add(new CommentEntity(this._chatService.Client.UserName, this.Message));
                 if (this.IsSending) {
-                    this._bouyomiService.SendMessage(this.Message);
+                    await this._bouyomiService.SendMessage(this.Message);
                 }
                 this.Message = "";
             }
