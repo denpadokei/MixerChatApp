@@ -1,4 +1,5 @@
-﻿using Microsoft.Mixer.ShortcodeOAuth;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Mixer.ShortcodeOAuth;
 using MixerChatApp.Core.Interfaces;
 using Newtonsoft.Json;
 using Prism.Commands;
@@ -63,13 +64,24 @@ namespace MixerChatApp.Core.Services
         {
             try {
                 // Create your OAuth client. Specify your client ID, and which permissions you want.
+
+
+#if DEBUG
+                var bulder = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile(@".\appsettings.Develop.json");
+                var configuration = bulder.Build();
+
+                var clientid = configuration["ClientId"];
+#else
+                var clientid = this.CLIENT_ID;
+#endif
                 var client = new OAuthClient(
                     new OAuthOptions
                     {
-                        ClientId = CLIENT_ID,
+                        ClientId = clientid,
                         Scopes = this.Scorp.ToArray(),
                     });
-
                 // Use the helper GrantAsync to get codes. Alternately, you can run
                 // the granting/polling loop manually using client.GetSingleCodeAsync.
                 var task = client.GrantAsync(code =>
@@ -103,7 +115,7 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        private const string CLIENT_ID = "your client id";
+        private string CLIENT_ID = "your client id";
         private class SettingEntity
         {
             [JsonProperty("AcsessToken")]

@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Unity;
 
 namespace MixerChatApp.Core.Services
 {
@@ -81,6 +82,15 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
+        [InjectionMethod]
+        public void Init()
+        {
+            if (DateTimeOffset.TryParse(this._configurationRoot[this.EXPIRES_AT_NAME], out var datetime) && (DateTimeOffset.UtcNow - datetime) < new TimeSpan(6, 0, 0)) {
+                this.Token = this._configurationRoot[this.ACSESS_TOKEN_NAME];
+                this.ExpiresAt = datetime;
+            }
+        }
+
         public async Task StartClient()
         {
             try {
@@ -116,41 +126,21 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // JSON
-        private class SettingEntity
-        {
-            [JsonProperty("AcsessToken")]
-            public string AcsessToken { get; set; }
-            [JsonProperty("ExporesAt")]
-            public string ExporesAt { get; set; }
-        }
+        
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
         //private readonly string SETTING_NAME = "MIXER_CHAT_APP_";
         private readonly string ACSESS_TOKEN_NAME = "AcsessToken";
         private readonly string EXPIRES_AT_NAME = "ExporesAt";
-        private IConfigurationRoot _configurationRoot;
+        [Dependency]
+        public IConfigurationRoot _configurationRoot;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         public ChatService()
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
-            if (!File.Exists(path)) {
-                using (var fs = File.CreateText(path)) {
-                    var text = JsonConvert.SerializeObject(new SettingEntity(), Formatting.Indented);
-                    fs.Write(text);
-                    fs.Close();
-                } 
-            }
-            var bulder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            this._configurationRoot = bulder.Build();
-            if (DateTimeOffset.TryParse(this._configurationRoot[this.EXPIRES_AT_NAME], out var datetime) && (DateTimeOffset.UtcNow - datetime) < new TimeSpan(6, 0, 0)) {
-                this.Token = this._configurationRoot[this.ACSESS_TOKEN_NAME];
-                this.ExpiresAt = datetime;
-            }
+            
         }
         #region IDisposable Support
         private bool disposedValue = false; // 重複する呼び出しを検出するには
