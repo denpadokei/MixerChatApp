@@ -1,4 +1,5 @@
-﻿using MixerChatApp.Core.Interfaces;
+﻿using MixerChatApp.Core.APIs;
+using MixerChatApp.Core.Interfaces;
 using MixerChatApp.Core.Services;
 using MixerChatApp.Core.Views;
 using Prism.Ioc;
@@ -11,7 +12,9 @@ namespace MixerChatApp.Core
     {
         public void OnInitialized(IContainerProvider containerProvider)
         {
-            
+            var rm = containerProvider.Resolve<IRegionManager>();
+            rm.RegisterViewWithRegion(RegionName.BouyomiRegionName, typeof(BouyomiSetting));
+            rm.RegisterViewWithRegion(RegionName.MixerRegionName, typeof(MixerSetting));
         }
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
@@ -19,7 +22,9 @@ namespace MixerChatApp.Core
             containerRegistry.RegisterSingleton<IChatService, ChatService>();
             containerRegistry.RegisterSingleton<IBouyomiService, BouyomiService>();
             containerRegistry.RegisterSingleton<IOAuthManagerable, OAuthManager>();
+            containerRegistry.RegisterSingleton<ISettingDomain, SettingDomain>();
             containerRegistry.RegisterDialog<Setting>(RegionName.SettingRegionName);
+            containerRegistry.RegisterInstance(new MixerAPI());
         }
     }
 }

@@ -1,9 +1,11 @@
-﻿<UserControl x:Class="MixerChatApp.Home.Views.Browser"
+﻿<UserControl x:Class="MixerChatApp.Core.Views.BouyomiSetting"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:prism="http://prismlibrary.com/"             
              prism:ViewModelLocator.AutoWireViewModel="True">
     <Grid>
-        <WebBrowser Source="https://www.google.co.jp/?gws_rd=ssl" />
+        <StackPanel>
+            <CheckBox Content="棒読みちゃんに送る" IsChecked="{Binding IsSending}" />
+        </StackPanel>
     </Grid>
 </UserControl>

@@ -35,16 +35,6 @@ namespace MixerChatApp.Home.Models
 
             set => this.SetProperty(ref this.sortedQueue_, value);
         }
-
-        /// <summary>説明 を取得、設定</summary>
-        private bool isSending_;
-        /// <summary>説明 を取得、設定</summary>
-        public bool IsSending
-        {
-            get => this.isSending_;
-
-            set => this.SetProperty(ref this.isSending_, value);
-        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -81,7 +71,7 @@ namespace MixerChatApp.Home.Models
         private async void MixerChatReceived(object sender, ChatMessageEventArgs e)
         {
             this.Queue.Add(new CommentEntity(e.UserName, e.Message));
-            if (this.IsSending) {
+            if (this._settingDomain.IsSending) {
                 await this._bouyomiService.SendMessage(e.Message);
             }
         }
@@ -92,6 +82,8 @@ namespace MixerChatApp.Home.Models
         public IChatService _chatService;
         [Dependency]
         public IBouyomiService _bouyomiService;
+        [Dependency]
+        public ISettingDomain _settingDomain;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

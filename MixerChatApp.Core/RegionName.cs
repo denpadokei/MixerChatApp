@@ -8,5 +8,8 @@ namespace MixerChatApp.Core
     {
         public const string MainContentRegion = "ContentRegion";
         public const string SettingRegionName = "SettingRegion";
+        public const string ConfigRegionName = "ConfigRegion";
+        public const string BouyomiRegionName = "BouyomiRegion";
+        public const string MixerRegionName = "MixerRegion";
     }
 }

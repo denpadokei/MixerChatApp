@@ -7,6 +7,8 @@ using MixerChatApp.Home;
 using System.IO;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MixerChatApp
 {
@@ -22,9 +24,9 @@ namespace MixerChatApp
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)
         {
-            base.ConfigureModuleCatalog(moduleCatalog);
             moduleCatalog.AddModule<CoreModule>();
             moduleCatalog.AddModule<HomeModule>();
+            base.ConfigureModuleCatalog(moduleCatalog);
         }
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
@@ -42,6 +44,7 @@ namespace MixerChatApp
                 .AddJsonFile("appsettings.json");
             var configuration = bulder.Build();
             containerRegistry.RegisterInstance(configuration);
+            containerRegistry.Register<ILoggerFactory, NullLoggerFactory>();
         }
 
         private class SettingEntity

@@ -116,9 +116,15 @@ namespace MixerChatApp.Core.Services
 
         public async Task<bool> SendMessage(string message)
         {
-            var result = await this.Client.SendMessageAsync(message);
-            Debug.WriteLine($"{result}");
-            return result;
+            try {
+                var result = await this.Client.SendMessageAsync(message);
+                Debug.WriteLine($"{result}");
+                return result;
+            }
+            catch (Exception e) {
+                Debug.WriteLine($"{e.Message}");
+                return false;
+            }
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
