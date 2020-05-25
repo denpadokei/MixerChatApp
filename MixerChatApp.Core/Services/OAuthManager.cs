@@ -69,7 +69,7 @@ namespace MixerChatApp.Core.Services
 #if DEBUG
                 var bulder = new ConfigurationBuilder()
                     .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.Develop.json");
+                    .AddJsonFile(@".\appsettings.Develop.json");
                 var configuration = bulder.Build();
 
                 var clientid = configuration["ClientId"];
@@ -115,7 +115,7 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        private string CLIENT_ID;
+        private string CLIENT_ID = "your client id";
         private class SettingEntity
         {
             [JsonProperty("AcsessToken")]
