@@ -103,7 +103,7 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        private const string CLIENT_ID = "3b85e7f860817b1ff0263309e7ad49ecfca2b90be648a8c5";
+        private const string CLIENT_ID = "adbf756f3c9546a49f882e3b8c026fee5665288cd1d2b2b9";
         private class SettingEntity
         {
             [JsonProperty("AcsessToken")]
