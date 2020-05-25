@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Mixer.ShortcodeOAuth;
+using MixerChatApp.Core.APIs;
 using MixerChatApp.Core.Interfaces;
+using MixerLib;
 using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
@@ -9,9 +12,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
+using Unity;
 
 namespace MixerChatApp.Core.Services
 {
@@ -27,6 +32,26 @@ namespace MixerChatApp.Core.Services
             get => this.cord_;
 
             set => this.SetProperty(ref this.cord_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string userName_;
+        /// <summary>説明 を取得、設定</summary>
+        public string UserName
+        {
+            get => this.userName_;
+
+            set => this.SetProperty(ref this.userName_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private DateTimeOffset connectDate_;
+        /// <summary>説明 を取得、設定</summary>
+        public DateTimeOffset ConnectDate
+        {
+            get => this.connectDate_;
+
+            set => this.SetProperty(ref this.connectDate_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -101,6 +126,9 @@ namespace MixerChatApp.Core.Services
                     sw.Write(text);
                     sw.Close();
                 }
+                this.ConnectDate = this.Tokens.ExpiresAt;
+                this.UserName = await this._aPI.GetUserName(this.Tokens.AccessToken);
+                
             }
             catch (OAuthException oe) {
                 Debug.WriteLine($"{oe.Message}");
@@ -115,6 +143,9 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
+        [Dependency]
+        public MixerAPI _aPI;
+
         private string CLIENT_ID = "your client id";
         private class SettingEntity
         {
@@ -130,6 +161,7 @@ namespace MixerChatApp.Core.Services
         {
             this.Scorp = new List<string>()
             {
+                "user:details:self",
                 "channel:update:self",
                 "chat:bypass_links",
                 "chat:bypass_slowchat",

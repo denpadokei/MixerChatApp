@@ -1,4 +1,5 @@
-﻿using MixerChatApp.Core.Interfaces;
+﻿using MixerChatApp.Core.APIs;
+using MixerChatApp.Core.Interfaces;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Regions;
@@ -6,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using Unity;
 
@@ -23,6 +25,26 @@ namespace MixerChatApp.Core.ViewModels
             get => this.code_;
 
             set => this.SetProperty(ref this.code_, value);
+        }
+
+        /// <summary>ユーザー名 を取得、設定</summary>
+        private string userName_;
+        /// <summary>ユーザー名 を取得、設定</summary>
+        public string UserName
+        {
+            get => this.userName_;
+
+            set => this.SetProperty(ref this.userName_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private DateTimeOffset connectDate_;
+        /// <summary>説明 を取得、設定</summary>
+        public DateTimeOffset ConnectDate
+        {
+            get => this.connectDate_;
+
+            set => this.SetProperty(ref this.connectDate_, value);
         }
 
         /// <summary>説明 を取得、設定</summary>
@@ -60,15 +82,15 @@ namespace MixerChatApp.Core.ViewModels
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
                 this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
-                this._chatService, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
+                this._chatService, nameof(INotifyPropertyChanged.PropertyChanged), this.OnChatServicePropertyChanged);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
         private void OnManagerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            if (sender is IOAuthManagerable manager && e.PropertyName == nameof(manager.Code)) {
-                this.Code = manager.Code;
+            if (sender is IOAuthManagerable manager && e.PropertyName == nameof(manager.UserName)) {
+                this.UserName = manager.UserName;
             }
         }
 
@@ -81,8 +103,13 @@ namespace MixerChatApp.Core.ViewModels
 
         private bool IsDisConnected()
         {
-            return !((DateTimeOffset.UtcNow - this._chatService.ExpiresAt) < new TimeSpan(6, 0, 0)
+            var isDisconnected = !((DateTimeOffset.UtcNow - this._chatService.ExpiresAt) < new TimeSpan(6, 0, 0)
                 && !string.IsNullOrEmpty(this._chatService.Token));
+            if (!isDisconnected) {
+                this.UserName = this._aPI.GetUserName(this._chatService.Token).Result;
+                this.ConnectDate = this._chatService.ExpiresAt;
+            }
+            return isDisconnected;
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -91,6 +118,8 @@ namespace MixerChatApp.Core.ViewModels
         public IOAuthManagerable _oAuthManager;
         [Dependency]
         public IChatService _chatService;
+        [Dependency]
+        public MixerAPI _aPI;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

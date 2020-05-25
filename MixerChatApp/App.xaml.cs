@@ -7,6 +7,8 @@ using MixerChatApp.Home;
 using System.IO;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace MixerChatApp
 {
@@ -42,6 +44,7 @@ namespace MixerChatApp
                 .AddJsonFile("appsettings.json");
             var configuration = bulder.Build();
             containerRegistry.RegisterInstance(configuration);
+            containerRegistry.Register<ILoggerFactory, NullLoggerFactory>();
         }
 
         private class SettingEntity
