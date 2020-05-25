@@ -4,6 +4,9 @@ using System.Windows;
 using Prism.Modularity;
 using MixerChatApp.Core;
 using MixerChatApp.Home;
+using System.IO;
+using Newtonsoft.Json;
+using Microsoft.Extensions.Configuration;
 
 namespace MixerChatApp
 {
@@ -26,7 +29,27 @@ namespace MixerChatApp
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
+            if (!File.Exists(path)) {
+                using (var fs = File.CreateText(path)) {
+                    var text = JsonConvert.SerializeObject(new SettingEntity(), Formatting.Indented);
+                    fs.Write(text);
+                    fs.Close();
+                }
+            }
+            var bulder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json");
+            var configuration = bulder.Build();
+            containerRegistry.RegisterInstance(configuration);
+        }
 
+        private class SettingEntity
+        {
+            [JsonProperty("AcsessToken")]
+            public string AcsessToken { get; set; }
+            [JsonProperty("ExporesAt")]
+            public string ExporesAt { get; set; }
         }
     }
 }
