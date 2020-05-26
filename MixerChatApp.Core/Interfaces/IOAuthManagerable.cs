@@ -17,5 +17,6 @@ namespace MixerChatApp.Core.Interfaces
         List<string> Scorp { get; set; }
         public OAuthTokens Tokens { get; set; }
         Task RunAsync();
+        Task RefreshToken();
     }
 }

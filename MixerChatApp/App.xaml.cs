@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using MixerChatApp.Core.Models;
 
 namespace MixerChatApp
 {
@@ -34,7 +35,7 @@ namespace MixerChatApp
             var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
             if (!File.Exists(path)) {
                 using (var fs = File.CreateText(path)) {
-                    var text = JsonConvert.SerializeObject(new SettingEntity(), Formatting.Indented);
+                    var text = JsonConvert.SerializeObject(new JsonSettingEntity(), Formatting.Indented);
                     fs.Write(text);
                     fs.Close();
                 }
@@ -45,14 +46,6 @@ namespace MixerChatApp
             var configuration = bulder.Build();
             containerRegistry.RegisterInstance(configuration);
             containerRegistry.Register<ILoggerFactory, NullLoggerFactory>();
-        }
-
-        private class SettingEntity
-        {
-            [JsonProperty("AcsessToken")]
-            public string AcsessToken { get; set; }
-            [JsonProperty("ExporesAt")]
-            public string ExporesAt { get; set; }
         }
     }
 }
