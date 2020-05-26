@@ -6,6 +6,9 @@ namespace MixerChatApp.Core.Interfaces
 {
     public interface ISettingDomain
     {
-        public bool IsSending { get; set; }
+        bool IsSending { get; set; }
+        bool IsSaveUserInformation { get; set; }
+        void Save();
+        void SaveToken();
     }
 }

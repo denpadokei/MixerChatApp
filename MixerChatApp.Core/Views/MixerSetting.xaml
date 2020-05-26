@@ -7,7 +7,6 @@
         <StackPanel>
             <DockPanel>
                 <Button Content="連携" Width="80" Command="{Binding CreateTokensCommand}" />
-                <TextBox IsReadOnly="True" Text="{Binding Code}" />
             </DockPanel>
             <DockPanel >
                 <Label Content="連携ユーザー名:"/>
@@ -17,6 +16,7 @@
                 <Label Content="連携時刻:"/>
                 <TextBox IsReadOnly="True" Text="{Binding ConnectDate}"/>
             </DockPanel>
+            <CheckBox Content="ログイン情報を記憶する" IsChecked="{Binding IsSaveUserInformation}" Margin="0, 10" />
         </StackPanel>
     </Grid>
 </UserControl>

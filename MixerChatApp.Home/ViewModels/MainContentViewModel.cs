@@ -1,8 +1,10 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.Mixer.ShortcodeOAuth;
+using Microsoft.Win32;
 using MixerChatApp.Core;
 using MixerChatApp.Core.Interfaces;
 using MixerChatApp.Home.Models;
 using MixerLib.Events;
+using Newtonsoft.Json;
 using Prism.Commands;
 using Prism.Mvvm;
 using Prism.Services.Dialogs;
@@ -11,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Mail;
 using System.Threading;
@@ -108,6 +111,7 @@ namespace MixerChatApp.Home.ViewModels
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
                 this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnOauthPropertyChanged);
             this.Collection = this._domain.SortedQueue.ToSyncedSynchronizationContextCollection(SynchronizationContext.Current);
+            
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*

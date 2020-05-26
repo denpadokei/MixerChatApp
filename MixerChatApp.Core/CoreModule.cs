@@ -1,5 +1,6 @@
 ﻿using MixerChatApp.Core.APIs;
 using MixerChatApp.Core.Interfaces;
+using MixerChatApp.Core.Models;
 using MixerChatApp.Core.Services;
 using MixerChatApp.Core.Views;
 using Prism.Ioc;
@@ -25,6 +26,7 @@ namespace MixerChatApp.Core
             containerRegistry.RegisterSingleton<ISettingDomain, SettingDomain>();
             containerRegistry.RegisterDialog<Setting>(RegionName.SettingRegionName);
             containerRegistry.RegisterInstance(new MixerAPI());
+            containerRegistry.RegisterInstance(new JsonSettingEntity());
         }
     }
 }
