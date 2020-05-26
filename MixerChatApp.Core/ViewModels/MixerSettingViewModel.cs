@@ -42,6 +42,16 @@ namespace MixerChatApp.Core.ViewModels
         }
 
         /// <summary>説明 を取得、設定</summary>
+        private string connectDateString_;
+        /// <summary>説明 を取得、設定</summary>
+        public string ConnectDateString
+        {
+            get => this.connectDateString_;
+
+            set => this.SetProperty(ref this.connectDateString_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
         private bool isSaveUserInformation_;
         /// <summary>説明 を取得、設定</summary>
         public bool IsSaveUserInformation
@@ -72,6 +82,9 @@ namespace MixerChatApp.Core.ViewModels
             base.OnPropertyChanged(args);
             if (args.PropertyName == nameof(this.IsSaveUserInformation)) {
                 this._domain.IsSaveUserInformation = this.IsSaveUserInformation;
+            }
+            else if (args.PropertyName == nameof(this.ConnectDate)) {
+                this.ConnectDateString = $"{this.ConnectDate.DateTime:yyyy/MM/dd HH:mm:ss.fffff}";
             }
         }
         #endregion

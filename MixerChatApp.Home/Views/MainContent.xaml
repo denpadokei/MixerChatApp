@@ -21,7 +21,10 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding ChannelName}" />
+            <DockPanel Grid.Column="0">
+                <Label Content="接続先のユーザー名" />
+                <TextBox Text="{Binding ChannelName}" />
+            </DockPanel>
             <Button Grid.Column="1" Width="45" Content="接続" Command="{Binding StartCommand}" />
         </Grid>
         <DataGrid Grid.Row="2" ItemsSource="{Binding Collection}" AutoGenerateColumns="False" IsReadOnly="True">
@@ -33,15 +36,17 @@
         </DataGrid>
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
                 <ColumnDefinition />
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox Grid.Column="0" Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}">
+            <Label Content="コメント" />
+            <TextBox Grid.Column="1" Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}">
                 <TextBox.InputBindings>
                     <KeyBinding Gesture="Enter" Command="{Binding SendCommand}" />
                 </TextBox.InputBindings>
             </TextBox>
-            <Button Grid.Column="1" Width="45" Content="送信" Command="{Binding SendCommand}" />
+            <Button Grid.Column="2" Width="45" Content="送信" Command="{Binding SendCommand}" />
         </Grid>
     </Grid>
 </UserControl>

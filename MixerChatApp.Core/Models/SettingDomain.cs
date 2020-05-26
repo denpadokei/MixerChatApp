@@ -66,6 +66,10 @@ namespace MixerChatApp.Core.Models
                 }
                 else if (args.PropertyName == nameof(this.IsSaveUserInformation)) {
                     this._entity.IsSaveUserInformation = this.IsSaveUserInformation;
+                    this._oAuthManager.IsSaveUserInformation = this.IsSaveUserInformation;
+                    if (!this.IsSaveUserInformation) {
+                        this.SaveToken();
+                    }
                 }
                 this.Save();
             }
@@ -102,16 +106,26 @@ namespace MixerChatApp.Core.Models
         }
         public void SaveToken()
         {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (!Directory.Exists(Path.Combine(path, "mixerchat"))) {
-                Directory.CreateDirectory(Path.Combine(path, "mixerchat"));
-            }
+            try {
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (!Directory.Exists(Path.Combine(path, "mixerchat"))) {
+                    Directory.CreateDirectory(Path.Combine(path, "mixerchat"));
+                }
 
-            using (var sw = new StreamWriter(Path.Combine(path, TEMPFILENAME))) {
-                sw.Write(JsonConvert.SerializeObject(this._oAuthManager.Tokens, Formatting.Indented));
-                sw.Close();
+                if (this.IsSaveUserInformation && this._oAuthManager.Tokens != null) {
+                    using (var sw = new StreamWriter(Path.Combine(path, TEMPFILENAME))) {
+                        sw.Write(JsonConvert.SerializeObject(this._oAuthManager.Tokens, Formatting.Indented));
+                        sw.Close();
+                    }
+                }
+                else {
+                    var file = new FileInfo(Path.Combine(path, TEMPFILENAME));
+                    file.Delete();
+                }
             }
-            
+            catch (Exception e) {
+                Debug.WriteLine($"{e}");
+            }
         }
         public void Save()
         {
@@ -127,9 +141,7 @@ namespace MixerChatApp.Core.Models
         public void OnOauthPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(IOAuthManagerable.Tokens)) {
-                if (this.IsSaveUserInformation) {
-                    this.SaveToken();
-                }
+                this.SaveToken();
                 this._chatService.Token = this._oAuthManager.Tokens.AccessToken;
             }
         }
