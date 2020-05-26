@@ -9,13 +9,16 @@ using Prism.Commands;
 using Prism.Mvvm;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection.Metadata;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Timers;
 using Unity;
 
 namespace MixerChatApp.Core.Services
@@ -24,6 +27,16 @@ namespace MixerChatApp.Core.Services
     {
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プロパティ
+        /// <summary>説明 を取得、設定</summary>
+        private OAuthClient client_;
+        /// <summary>説明 を取得、設定</summary>
+        public OAuthClient Client
+        {
+            get => this.client_;
+
+            set => this.SetProperty(ref this.client_, value);
+        }
+
         /// <summary>説明 を取得、設定</summary>
         private string cord_;
         /// <summary>説明 を取得、設定</summary>
@@ -73,6 +86,16 @@ namespace MixerChatApp.Core.Services
 
             set => this.SetProperty(ref this.tokens_, value);
         }
+
+        /// <summary>説明 を取得、設定</summary>
+        private bool isSaveUserInformation_;
+        /// <summary>説明 を取得、設定</summary>
+        public bool IsSaveUserInformation
+        {
+            get => this.isSaveUserInformation_;
+
+            set => this.SetProperty(ref this.isSaveUserInformation_, value);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -82,6 +105,19 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // オーバーライドメソッド
+        protected override async void OnPropertyChanged(PropertyChangedEventArgs args)
+        {
+            base.OnPropertyChanged(args);
+            if (args.PropertyName == nameof(IsSaveUserInformation)) {
+                if (this.IsSaveUserInformation) {
+                    await this.RefreshToken();
+                    this._timer.Start();
+                }
+                else {
+                    this._timer.Stop();
+                }
+            }
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
@@ -89,27 +125,9 @@ namespace MixerChatApp.Core.Services
         {
             try {
                 // Create your OAuth client. Specify your client ID, and which permissions you want.
-
-
-#if DEBUG
-                var bulder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.Develop.json");
-                var configuration = bulder.Build();
-
-                var clientid = configuration["ClientId"];
-#else
-                var clientid = this.CLIENT_ID;
-#endif
-                var client = new OAuthClient(
-                    new OAuthOptions
-                    {
-                        ClientId = clientid,
-                        Scopes = this.Scorp.ToArray(),
-                    });
                 // Use the helper GrantAsync to get codes. Alternately, you can run
                 // the granting/polling loop manually using client.GetSingleCodeAsync.
-                var task = client.GrantAsync(code =>
+                var task = this.Client.GrantAsync(code =>
                 {
                     this.Code = code;
                     var url = "https://mixer.com/go?code=" + $"{this.Code}";
@@ -140,11 +158,23 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
+        private async void TimerEvent(object sender, ElapsedEventArgs e)
+        {
+            await this.RefreshToken();
+        }
+
+        private async Task RefreshToken()
+        {
+            var token = await this.Client.RefreshAsync(this.Tokens).ConfigureAwait(false);
+            this.Tokens = token;
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
         [Dependency]
         public MixerAPI _aPI;
+
+        private readonly System.Timers.Timer _timer;
 
         private string CLIENT_ID = "your client id";
         private class SettingEntity
@@ -159,9 +189,12 @@ namespace MixerChatApp.Core.Services
         #region // 構築・破棄
         public OAuthManager()
         {
+            var timespan = new TimeSpan(5, 55, 0);
+            this._timer = new System.Timers.Timer(timespan.TotalMilliseconds);
+            this._timer.Elapsed += this.TimerEvent;
+
             this.Scorp = new List<string>()
             {
-                "user:details:self",
                 "channel:update:self",
                 "chat:bypass_links",
                 "chat:bypass_slowchat",
@@ -171,6 +204,23 @@ namespace MixerChatApp.Core.Services
                 "chat:timeout",
                 "chat:whisper",
             };
+
+#if DEBUG
+            var bulder = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.Develop.json");
+            var configuration = bulder.Build();
+
+            var clientid = configuration["ClientId"];
+#else
+                var clientid = this.CLIENT_ID;
+#endif
+            this.Client = new OAuthClient(
+                new OAuthOptions
+                {
+                    ClientId = clientid,
+                    Scopes = this.Scorp.ToArray(),
+                });
         }
         #endregion
 
