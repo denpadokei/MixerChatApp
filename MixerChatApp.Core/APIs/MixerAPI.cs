@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Primitives;
 using MixerChatApp.Core.Extentions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Polly;
 using Polly.Retry;
 using System;
@@ -41,8 +42,8 @@ namespace MixerChatApp.Core.APIs
 
                 var res = await client.GetAsync("https://mixer.com/api/v1/users/current").ConfigureAwait(false);
 
-                var json = JsonConvert.DeserializeObject<UserInfoEntity>(await res.Content.ReadAsStringAsync().ConfigureAwait(false));
-                return json.UserName;
+                var json = JsonConvert.DeserializeObject<JObject>(await res.Content.ReadAsStringAsync().ConfigureAwait(false));
+                return json.Value<string>("username");
             }
             catch (Exception e) {
                 Debug.WriteLine(e);
@@ -57,11 +58,5 @@ namespace MixerChatApp.Core.APIs
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄
         #endregion
-
-        private class UserInfoEntity
-        {
-            [JsonProperty("username")]
-            public string UserName { get; set; }
-        }
     }
 }

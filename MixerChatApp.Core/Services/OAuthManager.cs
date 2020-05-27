@@ -122,7 +122,7 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
-        public async Task RunAsync()
+        public async Task<bool> RunAsync()
         {
             try {
                 // Create your OAuth client. Specify your client ID, and which permissions you want.
@@ -140,34 +140,38 @@ namespace MixerChatApp.Core.Services
                 Debug.WriteLine($"Refresh token: {this.Tokens.RefreshToken}");
                 Debug.WriteLine($"Expires At: {this.Tokens.ExpiresAt}");
 
-                var text = JsonConvert.SerializeObject(this._entity, Formatting.Indented);
-                using (var sw = new StreamWriter(@".\appsettings.json")) {
-                    sw.Write(text);
-                    sw.Close();
-                }
                 this.ConnectDate = this.Tokens.ExpiresAt;
                 this.UserName = await this._aPI.GetUserName(this.Tokens.AccessToken);
+                return true;
                 
             }
             catch (OAuthException oe) {
                 Debug.WriteLine($"{oe.Message}");
+                return false;
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");
+                return false;
             }
         }
 
-        public async Task RefreshToken()
+        public async Task<bool> RefreshToken()
         {
             try {
+                if (this.Tokens == null) {
+                    this.UserName = "";
+                    return false;
+                }
                 var token = await this.Client.RefreshAsync(this.Tokens).ConfigureAwait(false);
                 this.Tokens = token;
                 this.ConnectDate = this.Tokens.ExpiresAt;
                 this.UserName = await this._aPI.GetUserName(this.Tokens.AccessToken);
+                return true;
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");
-                throw;
+                this.UserName = "";
+                return false;
             }
         }
         #endregion
@@ -177,15 +181,11 @@ namespace MixerChatApp.Core.Services
         {
             await this.RefreshToken();
         }
-
-        
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
         [Dependency]
         public MixerAPI _aPI;
-        [Dependency]
-        public JsonSettingEntity _entity;
 
         private readonly System.Timers.Timer _timer;
 

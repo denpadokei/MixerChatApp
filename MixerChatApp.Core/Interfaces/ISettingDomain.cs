@@ -8,6 +8,8 @@ namespace MixerChatApp.Core.Interfaces
     {
         bool IsSending { get; set; }
         bool IsSaveUserInformation { get; set; }
+        int BouyomiPort { get; set; }
+        string BouyomiHost { get; set; }
         void Save();
         void SaveToken();
     }

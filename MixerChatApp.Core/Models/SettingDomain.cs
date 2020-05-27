@@ -27,6 +27,7 @@ namespace MixerChatApp.Core.Models
         /// <summary>説明 を取得、設定</summary>
         private bool isSending_;
         /// <summary>説明 を取得、設定</summary>
+        [JsonProperty]
         public bool IsSending
         {
             get => this.isSending_;
@@ -37,11 +38,34 @@ namespace MixerChatApp.Core.Models
         /// <summary>説明 を取得、設定</summary>
         private bool isSaveUserInformation_;
         /// <summary>説明 を取得、設定</summary>
+        [JsonProperty]
         public bool IsSaveUserInformation
         {
             get => this.isSaveUserInformation_;
 
             set => this.SetProperty(ref this.isSaveUserInformation_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private int bouyomiPort_;
+        /// <summary>説明 を取得、設定</summary>
+        [JsonProperty]
+        public int BouyomiPort
+        {
+            get => this.bouyomiPort_;
+
+            set => this.SetProperty(ref this.bouyomiPort_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string bouyomiHost_;
+        /// <summary>説明 を取得、設定</summary>
+        [JsonProperty]
+        public string BouyomiHost
+        {
+            get => this.bouyomiHost_;
+
+            set => this.SetProperty(ref this.bouyomiHost_, value);
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -55,17 +79,19 @@ namespace MixerChatApp.Core.Models
         protected override void OnPropertyChanged(PropertyChangedEventArgs args)
         {
             base.OnPropertyChanged(args);
-
             if (this._isInit) {
                 return;
             }
-
-            if (this._entity != null) {
-                if (args.PropertyName == nameof(this.IsSending)) {
-                    this._entity.IsSending = this.IsSending;
+            
+            if (args.PropertyName == nameof(this.IsSaveUserInformation)) {
+                this.SaveToken();
+            }
+            else {
+                if (args.PropertyName == nameof(this.BouyomiPort)) {
+                    this._bouyomiService.Port = this.BouyomiPort;
                 }
-                else if (args.PropertyName == nameof(this.IsSaveUserInformation)) {
-                    this._entity.IsSaveUserInformation = this.IsSaveUserInformation;
+                else if (args.PropertyName == nameof(this.BouyomiHost)) {
+                    this._bouyomiService.Host = this.BouyomiHost;
                 }
                 this.Save();
             }
@@ -81,14 +107,14 @@ namespace MixerChatApp.Core.Models
         {
             this._isInit = true;
             this.IsSending = bool.Parse(this._configuration["IsSending"]);
+            this.BouyomiPort = int.Parse(this._configuration["BouyomiPort"]);
+            this.BouyomiHost = this._configuration["BouyomiHost"];
+            this.Save();
+
             this.IsSaveUserInformation = bool.Parse(this._configuration["IsSaveUserInformation"]);
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (this.IsSaveUserInformation && File.Exists(Path.Combine(path, TEMPFILENAME))) {
-                using (var sr = new StreamReader(Path.Combine(path, TEMPFILENAME))) {
-                    this._oAuthManager.Tokens = JsonConvert.DeserializeObject<OAuthTokens>(sr.ReadToEnd());
-                    sr.Close();
-                }
+            if (this.IsSaveUserInformation) {
                 try {
+                    this._oAuthManager.Tokens = this._fileService.ReadTokens();
                     await this._oAuthManager.RefreshToken();
                 }
                 catch (Exception e) {
@@ -96,40 +122,21 @@ namespace MixerChatApp.Core.Models
                 }
                 this._oAuthManager.IsSaveUserInformation = this.IsSaveUserInformation;
             }
+            this.SaveToken();
+
             WeakEventManager<INotifyPropertyChanged, PropertyChangedEventArgs>.AddHandler(
                 this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnOauthPropertyChanged);
             this._isInit = false;
         }
-        public void SaveToken()
-        {
-            var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (!Directory.Exists(Path.Combine(path, "mixerchat"))) {
-                Directory.CreateDirectory(Path.Combine(path, "mixerchat"));
-            }
-
-            using (var sw = new StreamWriter(Path.Combine(path, TEMPFILENAME))) {
-                sw.Write(JsonConvert.SerializeObject(this._oAuthManager.Tokens, Formatting.Indented));
-                sw.Close();
-            }
-            
-        }
-        public void Save()
-        {
-            var jsontext = JsonConvert.SerializeObject(this._entity, Formatting.Indented);
-            using (var sw = new StreamWriter(@".\appsettings.json")) {
-                sw.Write(jsontext);
-                sw.Close();
-            }
-        }
+        public void SaveToken() => this._fileService?.SaveToken(this._oAuthManager.Tokens, !this.IsSaveUserInformation);
+        public void Save() => this._fileService?.Save(this);
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
         public void OnOauthPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(IOAuthManagerable.Tokens)) {
-                if (this.IsSaveUserInformation) {
-                    this.SaveToken();
-                }
+                this.SaveToken();
                 this._chatService.Token = this._oAuthManager.Tokens.AccessToken;
             }
         }
@@ -137,15 +144,22 @@ namespace MixerChatApp.Core.Models
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
         [Dependency]
-        public JsonSettingEntity _entity;
+        [JsonIgnore]
+        public IFileService _fileService;
         [Dependency]
+        [JsonIgnore]
         public IConfigurationRoot _configuration;
         [Dependency]
+        [JsonIgnore]
         public IOAuthManagerable _oAuthManager;
         [Dependency]
+        [JsonIgnore]
         public IChatService _chatService;
 
-        private static readonly string TEMPFILENAME = @"mixerchat\e05kj2W8bYEmQT0B";
+        [Dependency]
+        [JsonIgnore]
+        public IBouyomiService _bouyomiService;
+
         private bool _isInit;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
