@@ -24,6 +24,26 @@ namespace MixerChatApp.Core.ViewModels
 
             set => this.SetProperty(ref this.isSending_, value);
         }
+
+        /// <summary>説明 を取得、設定</summary>
+        private int port_;
+        /// <summary>説明 を取得、設定</summary>
+        public int Port
+        {
+            get => this.port_;
+
+            set => this.SetProperty(ref this.port_, value);
+        }
+
+        /// <summary>説明 を取得、設定</summary>
+        private string host_;
+        /// <summary>説明 を取得、設定</summary>
+        public string Host
+        {
+            get => this.host_;
+
+            set => this.SetProperty(ref this.host_, value);
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // コマンド
@@ -39,6 +59,12 @@ namespace MixerChatApp.Core.ViewModels
             if (args.PropertyName == nameof(this.IsSending)) {
                 this._settingDomain.IsSending = this.IsSending;
             }
+            else if (args.PropertyName == nameof(this.Port)) {
+                this._settingDomain.BouyomiPort = this.Port;
+            }
+            else if (args.PropertyName == nameof(this.Host)) {
+                this._settingDomain.BouyomiHost = this.Host;
+            }
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -47,6 +73,8 @@ namespace MixerChatApp.Core.ViewModels
         public void Init()
         {
             this.IsSending = this._settingDomain.IsSending;
+            this.Port = this._settingDomain.BouyomiPort;
+            this.Host = this._settingDomain.BouyomiHost;
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
@@ -54,8 +82,6 @@ namespace MixerChatApp.Core.ViewModels
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        [Dependency]
-        public IBouyomiService _bouyomiService;
         [Dependency]
         public ISettingDomain _settingDomain;
         #endregion

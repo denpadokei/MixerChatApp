@@ -10,9 +10,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MixerChatApp.Home", "MixerChatApp.Home\MixerChatApp.Home.csproj", "{C90A93F7-2FFC-4ABF-9BAF-BDBDBB7B3846}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0F9F784-B94C-41E4-9A1A-47DA788E66AE}"
-	ProjectSection(SolutionItems) = preProject
-		pakages\DenpadokeiFramework.dll = pakages\DenpadokeiFramework.dll
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

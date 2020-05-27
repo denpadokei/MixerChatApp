@@ -32,19 +32,6 @@ namespace MixerChatApp
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
-            if (!File.Exists(path)) {
-                using (var fs = File.CreateText(path)) {
-                    var text = JsonConvert.SerializeObject(new JsonSettingEntity(), Formatting.Indented);
-                    fs.Write(text);
-                    fs.Close();
-                }
-            }
-            var bulder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json");
-            var configuration = bulder.Build();
-            containerRegistry.RegisterInstance(configuration);
             containerRegistry.Register<ILoggerFactory, NullLoggerFactory>();
         }
     }

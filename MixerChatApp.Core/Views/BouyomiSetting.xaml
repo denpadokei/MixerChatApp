@@ -6,6 +6,14 @@
     <Grid>
         <StackPanel>
             <CheckBox Content="棒読みちゃんに送る" IsChecked="{Binding IsSending}" />
+            <DockPanel>
+                <Label Content="棒読みちゃんのポート(デフォルトは50001)" />
+                <TextBox Text="{Binding Port}" />
+            </DockPanel>
+            <DockPanel>
+                <Label Content="棒読みちゃんのアドレス(デフォルトは127.0.0.1)" />
+                <TextBox Text="{Binding Host}" />
+            </DockPanel>
         </StackPanel>
     </Grid>
 </UserControl>

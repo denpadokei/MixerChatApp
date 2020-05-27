@@ -81,7 +81,7 @@ namespace MixerChatApp.Core.ViewModels
         {
             base.OnPropertyChanged(args);
             if (args.PropertyName == nameof(this.IsSaveUserInformation)) {
-                this._domain.IsSaveUserInformation = this.IsSaveUserInformation;
+                this._settingDomain.IsSaveUserInformation = this.IsSaveUserInformation;
             }
             else if (args.PropertyName == nameof(this.ConnectDate)) {
                 this.ConnectDateString = $"{this.ConnectDate.DateTime:yyyy/MM/dd HH:mm:ss.fffff}";
@@ -97,7 +97,7 @@ namespace MixerChatApp.Core.ViewModels
                 this._oAuthManager, nameof(INotifyPropertyChanged.PropertyChanged), this.OnManagerPropertyChanged);
             try {
                 if (this._oAuthManager.Tokens != null) {
-                    this.UserName = await _aPI.GetUserName(this._oAuthManager.Tokens.AccessToken);
+                    this.UserName = await this._aPI.GetUserName(this._oAuthManager.Tokens.AccessToken);
                     this.ConnectDate = this._oAuthManager.Tokens.ExpiresAt;
                 }
             }
@@ -105,16 +105,22 @@ namespace MixerChatApp.Core.ViewModels
                 Debug.WriteLine($"{e}");
                 throw;
             }
-            this.IsSaveUserInformation = this._domain.IsSaveUserInformation;
+            this.IsSaveUserInformation = this._settingDomain.IsSaveUserInformation;
         }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
-        private void OnManagerPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private async void OnManagerPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (sender is IOAuthManagerable manager && e.PropertyName == nameof(manager.Tokens)) {
-                this.UserName = manager.UserName;
-                this.ConnectDate = manager.Tokens.ExpiresAt;
+                if (manager.Tokens != null) {
+                    this.UserName = await this._aPI.GetUserName(this._oAuthManager.Tokens.AccessToken);
+                    this.ConnectDate = manager.Tokens.ExpiresAt;
+                }
+                else {
+                    this.UserName = "";
+                    this.ConnectDateString = "";
+                }
             }
         }
         #endregion
@@ -125,7 +131,7 @@ namespace MixerChatApp.Core.ViewModels
         [Dependency]
         public MixerAPI _aPI;
         [Dependency]
-        public ISettingDomain _domain;
+        public ISettingDomain _settingDomain;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

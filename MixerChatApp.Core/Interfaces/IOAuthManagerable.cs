@@ -16,7 +16,7 @@ namespace MixerChatApp.Core.Interfaces
         DateTimeOffset ConnectDate { get; set; }
         List<string> Scorp { get; set; }
         public OAuthTokens Tokens { get; set; }
-        Task RunAsync();
-        Task RefreshToken();
+        Task<bool> RunAsync();
+        Task<bool> RefreshToken();
     }
 }
