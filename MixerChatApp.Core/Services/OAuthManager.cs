@@ -157,12 +157,16 @@ namespace MixerChatApp.Core.Services
 
         public async Task<bool> RefreshToken()
         {
+            Debug.WriteLine($"[{DateTime.Now}] : トークンをリフレッシュします。");
             try {
                 if (this.Tokens == null) {
                     this.UserName = "";
                     return false;
                 }
                 var token = await this.Client.RefreshAsync(this.Tokens).ConfigureAwait(false);
+                Debug.WriteLine($"Access token: {this.Tokens.AccessToken}");
+                Debug.WriteLine($"Refresh token: {this.Tokens.RefreshToken}");
+                Debug.WriteLine($"Expires At: {this.Tokens.ExpiresAt}");
                 this.Tokens = token;
                 this.ConnectDate = this.Tokens.ExpiresAt;
                 this.UserName = await this._aPI.GetUserName(this.Tokens.AccessToken);
@@ -202,7 +206,8 @@ namespace MixerChatApp.Core.Services
         #region // 構築・破棄
         public OAuthManager()
         {
-            var timespan = new TimeSpan(5, 55, 0);
+            //var timespan = new TimeSpan(5, 55, 0);
+            var timespan = new TimeSpan(0, 0, 10);
             this._timer = new System.Timers.Timer(timespan.TotalMilliseconds);
             this._timer.Elapsed += this.TimerEvent;
 

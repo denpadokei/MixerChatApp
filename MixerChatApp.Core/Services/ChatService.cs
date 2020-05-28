@@ -103,11 +103,15 @@ namespace MixerChatApp.Core.Services
                 }
                  
                 if (this.Client != null) {
+                    this.Client.ChatMessage -= this.GetChat;
                     this.Client.Dispose();
                     this.Client = null;
                 }
                 Debug.WriteLine($"{this.Auth.AuthMethod}");
                 this.Client = await MixerClient.StartAsync(this.ChannelName, this.Auth);
+                if (this.Client != null) {
+                    this.Client.ChatMessage += this.GetChat;
+                }
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");
@@ -129,10 +133,20 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
+        private async void GetChat(object sender, ChatMessageEventArgs e)
+        {
+#if DEBUG
+            var tmp = await this.Client.RestClient.GetChatAuthKeyAndEndpointsAsync();
+            Debug.WriteLine($"AuthKey : {tmp.Authkey}");
+            foreach (var item in tmp.Endpoints) {
+                Debug.WriteLine($"EndPoint : {item}");
+            }
+#endif
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // JSON
-        
+
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
