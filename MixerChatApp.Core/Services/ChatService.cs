@@ -82,15 +82,6 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // パブリックメソッド
-        [InjectionMethod]
-        public void Init()
-        {
-            if (DateTimeOffset.TryParse(this._configurationRoot[this.EXPIRES_AT_NAME], out var datetime) && (DateTimeOffset.UtcNow - datetime) < new TimeSpan(6, 0, 0)) {
-                this.Token = this._configurationRoot[this.ACSESS_TOKEN_NAME];
-                this.ExpiresAt = datetime;
-            }
-        }
-
         public async Task StartClient()
         {
             try {
@@ -103,11 +94,15 @@ namespace MixerChatApp.Core.Services
                 }
                  
                 if (this.Client != null) {
+                    this.Client.ChatMessage -= this.GetChat;
                     this.Client.Dispose();
                     this.Client = null;
                 }
                 Debug.WriteLine($"{this.Auth.AuthMethod}");
                 this.Client = await MixerClient.StartAsync(this.ChannelName, this.Auth);
+                if (this.Client != null) {
+                    this.Client.ChatMessage += this.GetChat;
+                }
             }
             catch (Exception e) {
                 Debug.WriteLine($"{e.Message}");
@@ -129,18 +124,19 @@ namespace MixerChatApp.Core.Services
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // プライベートメソッド
-        #endregion
-        //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
-        #region // JSON
-        
+        private async void GetChat(object sender, ChatMessageEventArgs e)
+        {
+#if DEBUG
+            var tmp = await this.Client.RestClient.GetChatAuthKeyAndEndpointsAsync();
+            Debug.WriteLine($"AuthKey : {tmp.Authkey}");
+            foreach (var item in tmp.Endpoints) {
+                Debug.WriteLine($"EndPoint : {item}");
+            }
+#endif
+        }
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // メンバ変数
-        //private readonly string SETTING_NAME = "MIXER_CHAT_APP_";
-        private readonly string ACSESS_TOKEN_NAME = "AcsessToken";
-        private readonly string EXPIRES_AT_NAME = "ExporesAt";
-        [Dependency]
-        public IConfigurationRoot _configurationRoot;
         #endregion
         //ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*ﾟ+｡｡+ﾟ*｡+ﾟ ﾟ+｡*
         #region // 構築・破棄

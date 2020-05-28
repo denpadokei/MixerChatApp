@@ -84,6 +84,7 @@ namespace MixerChatApp.Core.Models
             }
             
             if (args.PropertyName == nameof(this.IsSaveUserInformation)) {
+                this.Save();
                 this.SaveToken();
             }
             else {
@@ -109,9 +110,9 @@ namespace MixerChatApp.Core.Models
             this.IsSending = bool.Parse(this._configuration["IsSending"]);
             this.BouyomiPort = int.Parse(this._configuration["BouyomiPort"]);
             this.BouyomiHost = this._configuration["BouyomiHost"];
+            this.IsSaveUserInformation = bool.Parse(this._configuration["IsSaveUserInformation"]);
             this.Save();
 
-            this.IsSaveUserInformation = bool.Parse(this._configuration["IsSaveUserInformation"]);
             if (this.IsSaveUserInformation) {
                 try {
                     this._oAuthManager.Tokens = this._fileService.ReadTokens();
