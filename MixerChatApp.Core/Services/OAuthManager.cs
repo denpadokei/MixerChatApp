@@ -206,8 +206,8 @@ namespace MixerChatApp.Core.Services
         #region // 構築・破棄
         public OAuthManager()
         {
-            //var timespan = new TimeSpan(5, 55, 0);
-            var timespan = new TimeSpan(0, 0, 10);
+            var timespan = new TimeSpan(5, 55, 0);
+            
             this._timer = new System.Timers.Timer(timespan.TotalMilliseconds);
             this._timer.Elapsed += this.TimerEvent;
 
